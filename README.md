@@ -34,6 +34,8 @@ tests/
     login.spec.ts             # Validaciones de formulario y credenciales
     registro.spec.ts          # Validaciones con valores límite
     sesion.spec.ts            # Flujo completo post-login
+  accesibilidad/    
+    accesibilidad.spec.ts     # Tests de accesibilidad WCAG 2.0 AA
   api/
     login-api.spec.ts         # Contrato de POST /api/login
   integrado/
