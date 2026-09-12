@@ -1,0 +1,24 @@
+# Dependencias
+node_modules/
+
+# Reportes y resultados de Playwright
+/playwright-report/
+/test-results/
+/blob-report/
+
+
+
+
+# Variables de entorno y secretos (Información sensible que NO debe subir a Git)
+.env
+.env.*
+!.env.example
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
