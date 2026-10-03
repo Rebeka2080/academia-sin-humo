@@ -49,7 +49,7 @@ test.describe('Formulario y validaciones', () => {
   });
 
   // BUG-L07: la app aplica trim() al email y autentica con espacios — viola REQ-L01
-  test.skip('CP-L07 · Email con espacios al inicio o final muestra error', async ({ loginPage, page }) => {
+  test('CP-L07 · Email con espacios al inicio o final muestra error', async ({ loginPage, page }) => {
     await loginPage.login(' ana.garcia@ejemplo.com ', 'Segura2026!');
     await expect(loginPage.mensajeError).toBeVisible();
     await expect(loginPage.mensajeExito).not.toBeVisible();
@@ -84,19 +84,16 @@ test.describe('Credenciales — flujo principal', () => {
 });
 
 // ─── BLOQUE 3: Rate Limiting ──────────────────────────────────────────────────
-// BUG-L10: la app bloquea con 4 intentos en lugar de 5 — viola REQ-L03
-// Todos los casos de este bloque están skipeados hasta que el bug sea corregido
 
 test.describe.serial('Rate Limiting — bloqueo de cuenta', () => {
-
-  test.use({ timeout: 90000 });
 
   test.beforeEach(async ({ loginPage }) => {
     await loginPage.goto();
   });
 
-  // BUG-L10: la app bloquea en el 4.° intento — el botón no permanece habilitado
-  test.skip('CP-L10 · 4 intentos fallidos NO bloquean la cuenta — valor límite inferior', async ({ loginPage }) => {
+
+  test('CP-L10 · 4 intentos fallidos NO bloquean la cuenta — valor límite inferior', async ({ loginPage }) => {
+    test.setTimeout(60_000)
     for (let i = 0; i < 4; i++) {
       await loginPage.login('ana.garcia@ejemplo.com', 'Incorrecta123');
       await expect(loginPage.mensajeError).toBeVisible();
@@ -106,8 +103,7 @@ test.describe.serial('Rate Limiting — bloqueo de cuenta', () => {
     await expect(loginPage.mensajeExito).toBeVisible();
   });
 
-  // BUG-L10: relacionado — la cuenta ya está bloqueada desde el 4.° intento
-  test.skip('CP-L11 · 5 intentos fallidos consecutivos bloquean la cuenta — valor límite exacto', async ({ loginPage }) => {
+  test('CP-L11 · 5 intentos fallidos consecutivos bloquean la cuenta — valor límite exacto', async ({ loginPage }) => {
     for (let i = 0; i < 4; i++) {
       await loginPage.login('ana.garcia@ejemplo.com', 'Incorrecta123');
       await expect(loginPage.mensajeError).toBeVisible();
@@ -116,8 +112,7 @@ test.describe.serial('Rate Limiting — bloqueo de cuenta', () => {
     await expect(loginPage.botonIngresar).toBeDisabled();
   });
 
-  // BUG-L10: relacionado — el bloqueo ocurre en un intento distinto al especificado
-  test.skip('CP-L12 · Durante el bloqueo el botón permanece deshabilitado', async ({ loginPage }) => {
+  test('CP-L12 · Durante el bloqueo el botón permanece deshabilitado', async ({ loginPage }) => {
     for (let i = 0; i < 4; i++) {
       await loginPage.login('ana.garcia@ejemplo.com', 'Incorrecta123');
       await expect(loginPage.mensajeError).toBeVisible();
@@ -126,8 +121,9 @@ test.describe.serial('Rate Limiting — bloqueo de cuenta', () => {
     await expect(loginPage.botonIngresar).toBeDisabled();
   });
 
-  // BUG-L10: relacionado — no se puede verificar el timer con el umbral incorrecto
-  test.skip('CP-L13 · El botón se habilita exactamente cuando el timer llega a 0', async ({ loginPage }) => {
+
+  test('CP-L13 · El botón se habilita exactamente cuando el timer llega a 0', async ({ loginPage }) => {
+    test.setTimeout(60_000);
     for (let i = 0; i < 4; i++) {
       await loginPage.login('ana.garcia@ejemplo.com', 'Incorrecta123');
       await expect(loginPage.mensajeError).toBeVisible();
@@ -139,8 +135,7 @@ test.describe.serial('Rate Limiting — bloqueo de cuenta', () => {
     await expect(loginPage.mensajeExito).toBeVisible();
   });
 
-  // BUG-L10: relacionado — el reset de contador no se puede verificar con umbral incorrecto
-  test.skip('CP-L14 · Un login exitoso entre fallos resetea el contador', async ({ loginPage }) => {
+  test('CP-L14 · Un login exitoso entre fallos resetea el contador', async ({ loginPage }) => {
     for (let i = 0; i < 4; i++) {
       await loginPage.login('ana.garcia@ejemplo.com', 'Incorrecta123');
       await expect(loginPage.mensajeError).toBeVisible();

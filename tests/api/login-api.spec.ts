@@ -81,7 +81,7 @@ test.describe('API Login — POST /api/login', () => {
   // BUG-L10: la API bloquea en el 4.° intento en lugar del 5.°
   // maxAttempts: 5 en el response confirma que el límite configurado es 5
   // pero el bloqueo ocurre antes — viola REQ-L03
-  test.skip('CP-A04 · Rate limiting devuelve 429 en el 5.° intento fallido', async ({ request }) => {
+  test('CP-A04 · Rate limiting devuelve 429 en el 5.° intento fallido', async ({ request }) => {
     // Reset inicial
     await request.post('/api/login', {
       data: { email: 'ana.garcia@ejemplo.com', password: 'Segura2026!' },

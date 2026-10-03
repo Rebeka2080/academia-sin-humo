@@ -53,7 +53,7 @@ const casosRegistro = [
     edad: '25',
     esperado: 'error',
     mensajeEsperado: 'errorEmailFormato',
-    skip: true, // BUG-R03 — app acepta email sin dominio, viola REQ-R03
+    // BUG-R03 — app acepta email sin dominio, viola REQ-R03
   },
 
   // ── EMAIL DUPLICADO ──
@@ -146,7 +146,7 @@ const casosRegistro = [
     edad: '25',
     esperado: 'error',
     mensajeEsperado: 'errorContraseñaMaximo',
-    skip: true, // BUG-R13 — app acepta contraseña de más de 64 caracteres, viola REQ-R04
+    // BUG-R13 — app acepta contraseña de más de 64 caracteres, viola REQ-R04
   },
 
   // ── VALORES LÍMITE EDAD ──
@@ -194,8 +194,6 @@ const casosRegistro = [
 for (const caso of casosRegistro) {
   test(`${caso.id}: registro con ${caso.nombre} → ${caso.esperado}`, async ({ registroPage, page }) => {
 
-    test.skip(caso.skip === true, 'Bug documentado — pendiente de corrección');
-
     await registroPage.nombreCompleto.fill(caso.nombreCompleto);
     await registroPage.email.fill(caso.email);
     await registroPage.password.fill(caso.password);
@@ -234,7 +232,7 @@ for (const caso of casosRegistro) {
 
 // ─── Tests independientes ────────────────────────────────────────────
 
-test.skip('CP-R02: Formulario se limpia completamente tras registro exitoso', async ({ registroPage }) => {
+test('CP-R02: Formulario se limpia completamente tras registro exitoso', async ({ registroPage }) => {
   // BUG-R01 — app no limpia el formulario tras registro exitoso, viola REQ-R06
   await registroPage.nombreCompleto.fill('Ana García');
   await registroPage.email.fill(emailUnico());
