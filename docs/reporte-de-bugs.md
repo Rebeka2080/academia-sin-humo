@@ -14,8 +14,7 @@
   3. Ingresar contraseña: Segura2026!
   4. Hacer clic en "Iniciar sesión"
   5. Observar que el login es exitoso
-- **Evidencia:** Test `CP-L07` en `tests/ui/login.spec.ts` — marcado con `test.skip()`
-La aserción `mensajeError.toBeVisible()` falla y `mensajeExito` aparece en su lugar.
+- **Evidencia:** Test `CP-L07` en `tests/ui/login.spec.ts` — falla en la suite porque la aserción `mensajeError.toBeVisible()` falla y `mensajeExito` aparece en su lugar.
 - **Severidad:** Baja — el impacto funcional es mínimo ya que el usuario legítimo igual entra, pero el comportamiento es inconsistente con la spec y puede enmascarar problemas de validación de entrada en otras capas.
 - **Capa donde se detecta:** UI
 
@@ -48,7 +47,7 @@ La aserción `mensajeError.toBeVisible()` falla y `mensajeExito` aparece en su l
   2. Completar todos los campos con datos válidos
   3. Hacer clic en "Crear cuenta"
   4. Observar el estado de los campos tras ver el mensaje de éxito
-- **Evidencia:** Test `CP-R02` en `tests/ui/registro.spec.ts` — marcado con `test.skip()` porque la app no limpia el formulario. Las aserciones `toHaveValue('')` fallan en todos los campos.
+- **Evidencia:** Test `CP-R02` en `tests/ui/registro.spec.ts` — falla en la suite - Las aserciones `toHaveValue('')` fallan en todos los campos.
 - **Severidad:** Media — no impide el registro ni bloquea el flujo principal, pero viola la spec explícitamente y genera confusión al usuario que podría intentar registrar el mismo email dos veces.
 - **Capa donde se detecta:** UI
 
@@ -64,7 +63,7 @@ La aserción `mensajeError.toBeVisible()` falla y `mensajeExito` aparece en su l
   3. Completar el resto de campos con datos válidos
   4. Hacer clic en "Crear cuenta"
   5. Observar que el registro se procesa sin error
-- **Evidencia:** Test `CP-R19` en `tests/ui/registro.spec.ts` — marcado con `test.skip()` porque la app no rechaza el email sin dominio. La aserción `mensajeMailSinFormato.toBeVisible()` falla.
+- **Evidencia:** Test `CP-R19` en `tests/ui/registro.spec.ts` — falla en la suite porque la app no rechaza el email sin dominio. La aserción `mensajeMailSinFormato.toBeVisible()` falla.
 - **Severidad:** Alta — permite registrar emails malformados en el sistema, lo que puede causar fallos posteriores al intentar enviar correos de confirmación o recuperación de contraseña.
 - **Capa donde se detecta:** UI
 
@@ -80,7 +79,7 @@ La aserción `mensajeError.toBeVisible()` falla y `mensajeExito` aparece en su l
   3. Completar el resto de campos con datos válidos
   4. Hacer clic en "Crear cuenta"
   5. Observar que el registro se procesa sin error
-- **Evidencia:** Test `CP-R13` en `tests/ui/registro.spec.ts` — marcado con `test.skip()` porque la app no rechaza la contraseña de 65 caracteres. La aserción `mensajeContraseñaMaximo.toBeVisible()` falla.
+- **Evidencia:** Test `CP-R13` en `tests/ui/registro.spec.ts` — falla en la suite porque la app no rechaza la contraseña de 65 caracteres. La aserción `mensajeContraseñaMaximo.toBeVisible()` falla.
 - **Severidad:** Media — no bloquea el acceso inmediato, pero viola el límite de seguridad definido en la spec. Contraseñas sin límite superior pueden causar problemas de almacenamiento o de hashing en el backend.
 - **Capa donde se detecta:** UI
 
@@ -96,9 +95,35 @@ La aserción `mensajeError.toBeVisible()` falla y `mensajeExito` aparece en su l
   2. Navegar a `/login` en el browser con esa cookie activa
   3. Observar que la app muestra el formulario de login en lugar de la bienvenida
 - **Evidencia:** 
-  - Test `CP-I01` en `tests/integrado/integration.spec.ts` — marcado con `test.skip()`. 
-  - Código fuente de la app confirma que el login guarda el usuario en estado de React (`o(n.user)`) sin verificar la cookie en navegaciones posteriores.
+  - Test `CP-I01` en `tests/integrado/integration.spec.ts` — falla en la suite porque el código fuente de la app confirma que el login guarda el usuario en estado de React (`o(n.user)`) sin verificar la cookie en navegaciones posteriores.
   - `GET /api/auth/me` con cookie `ash_session` activa devuelve `{ "realUser": null }` — el servidor no reconoce la sesión establecida por `POST /api/login`.
 - **Severidad:** Alta — la sesión no es persistente. Si el usuario recarga la página queda deslogueado. Impacta directamente REQ-S01 y REQ-S02.
 - **Capa donde se detecta:** Integrado (UI + API)
+
+
+// BUG de inscripcion de curso:
+
+### BUG-C03 · Un curso se desbloquea al inscribirse en su prerequisito sin completarlo
+- **REQ violado:** REQ-C03 — "Un curso solo se desbloquea cuando el estudiante ha completado su prerequisito. Estar inscrito o en progreso no cuenta como completado."
+- **Comportamiento esperado:** "Diseño de casos de prueba" debe permanecer bloqueado hasta que Fundamentos de Testing esté completado.
+- **Comportamiento real:** Al inscribirse en Fundamentos, "Diseño de casos de prueba" se desbloquea inmediatamente sin haberlo completado.
+- **Pasos para reproducir:**
+  1. Navegar a /cursos sin ningún curso completado
+  2. Inscribirse en Fundamentos de Testing
+  3. Observar que Diseño de casos de prueba aparece desbloqueado
+- **Evidencia:** Verificado manualmente durante la exploración del catálogo.
+- **Severidad:** Alta — permite acceder a cursos avanzados sin completar los prerequisitos, rompiendo la progresión de aprendizaje.
+- **Capa donde se detecta:** UI
+
+### BUG-C06 · La API permite inscribirse a un curso con prerequisito pendiente
+- **REQ violado:** REQ-C06 — "La API de inscripción debe aplicar las mismas reglas de validación que la UI. Un curso con prerequisito pendiente debe ser rechazado tanto en la UI como en la API."
+- **Comportamiento esperado:** `POST /api/enroll` con un curso cuyo prerequisito no está completado debe devolver 403.
+- **Comportamiento real:** La API devuelve 200 e inscribe al estudiante aunque el prerequisito no esté completado.
+- **Pasos para reproducir:**
+  1. Estar logueado sin tener Fundamentos de Testing completado
+  2. Llamar a `POST /api/enroll` con `{ "courseId": "playwright-cero" }`
+  3. Observar que responde 200 e inscribe
+- **Evidencia:** Test `CP-E04` en `tests/api/enroll-api.spec.ts` — falla con `Expected: 403, Received: 200`
+- **Severidad:** Alta — permite saltear prerequisitos por API, rompiendo la integridad del sistema de cursos.
+- **Capa donde se detecta:** API
  
