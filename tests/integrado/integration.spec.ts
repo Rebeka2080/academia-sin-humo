@@ -1,5 +1,7 @@
 // tests/integrado/integration.spec.ts
 import { test, expect } from '../fixtures';
+import { LoginPage } from '../../pages/login.pages';
+import { CursosPage } from '../../pages/cursos.pages';
 
 test.describe('Integración UI + API — Login y pantalla de bienvenida', () => {
 
@@ -7,7 +9,8 @@ test.describe('Integración UI + API — Login y pantalla de bienvenida', () => 
   // POST /api/login setea ash_session pero la app no la lee al navegar —
   // la UI arranca sin estado y muestra el formulario en lugar de la bienvenida.
   // El flujo API → UI no es viable hasta que el bug sea corregido.
-  test.skip('CP-I01 · Login vía API establece sesión y la UI muestra la bienvenida', async ({ page, context }) => {
+
+  test('CP-I01 · Login vía API establece sesión y la UI muestra la bienvenida', async ({ page, context }) => {
     // 1. Preparación por API
     const respuesta = await page.request.post('/api/login', {
       data: {
@@ -36,5 +39,12 @@ test.describe('Integración UI + API — Login y pantalla de bienvenida', () => 
     await context.clearCookies();
   });
 
-
+  test('CP-I02 · Sin cookie de sesión la UI muestra el formulario y no la bienvenida', async ({ page }) => {
+    await page.goto('/login');
+    await expect(page.getByLabel('Email')).toBeVisible();
+    await expect(page.getByLabel('Contraseña')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Iniciar sesión' })).toBeVisible();
+    await expect(page.getByText('Has iniciado sesión correctamente.')).not.toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: /¡Hola,/i })).not.toBeVisible();
+  });
 });
